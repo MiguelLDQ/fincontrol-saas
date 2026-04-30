@@ -1,0 +1,28 @@
+{
+  "dependencies": {
+    "@nestjs/bull": "^11.0.4",
+    "@nestjs/config": "^4.0.3",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/platform-express": "^11.1.18",
+    "@nestjs/schedule": "^6.1.1",
+    "@nestjs/serve-static": "^5.0.5",
+    "@nestjs/throttler": "^6.5.0",
+    "@prisma/client": "^7.6.0",
+    "argon2": "^0.44.0",
+    "bull": "^4.16.5",
+    "cookie-parser": "^1.4.7",
+    "helmet": "^8.1.0",
+    "ioredis": "^5.10.1",
+    "multer": "^2.1.1",
+    "otplib": "^13.4.0",
+    "prisma": "^7.6.0",
+    "qrcode": "^1.5.4",
+    "sharp": "^0.34.5",
+    "tesseract.js": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.10",
+    "@types/multer": "^2.1.0",
+    "@types/qrcode": "^1.5.6"
+  }
+}

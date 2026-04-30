@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>FinControl — Arquivos Fonte</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0d1117;color:#e6edf3;font-family:'Segoe UI',system-ui,sans-serif;font-size:14px}
+.header{background:#161b22;border-bottom:1px solid #21262d;padding:16px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.header h1{font-size:16px;font-weight:600;color:#f0f6fc}
+.header p{font-size:12px;color:#8b949e;margin-top:2px}
+.progress{background:#21262d;border-radius:4px;height:4px;flex:1;margin-left:16px}
+.progress-fill{height:100%;background:linear-gradient(90deg,#238636,#2ea043);border-radius:4px;transition:.3s}
+.container{max-width:900px;margin:0 auto;padding:24px}
+.step{background:#161b22;border:1px solid #21262d;border-radius:12px;margin-bottom:16px;overflow:hidden}
+.step-header{padding:14px 18px;display:flex;align-items:center;gap:12px;cursor:pointer;user-select:none}
+.step-num{width:28px;height:28px;border-radius:50%;background:#21262d;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#8b949e;flex-shrink:0}
+.step.done .step-num{background:#238636;color:#fff}
+.step-title{font-size:14px;font-weight:500;flex:1}
+.step-path{font-size:11px;color:#8b949e;font-family:'Cascadia Code','Fira Code',monospace;background:#21262d;padding:2px 8px;border-radius:4px}
+.step-body{border-top:1px solid #21262d;display:none}
+.step.open .step-body{display:block}
+.file-block{position:relative}
+.file-toolbar{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:#0d1117;border-bottom:1px solid #21262d}
+.file-name{font-size:12px;color:#8b949e;font-family:monospace}
+.copy-btn{background:#21262d;border:1px solid #30363d;color:#c9d1d9;padding:5px 14px;border-radius:6px;font-size:12px;cursor:pointer;transition:.15s;font-family:monospace}
+.copy-btn:hover{background:#30363d;border-color:#8b949e}
+.copy-btn.copied{background:#238636;border-color:#2ea043;color:#fff}
+pre{padding:16px;overflow-x:auto;font-family:'Cascadia Code','Fira Code','JetBrains Mono',monospace;font-size:12px;line-height:1.6;max-height:400px;overflow-y:auto;background:#0d1117}
+pre::-webkit-scrollbar{width:4px;height:4px}
+pre::-webkit-scrollbar-thumb{background:#30363d;border-radius:2px}
+.cmd-block{padding:12px 16px;background:#010409;border-top:1px solid #21262d}
+.cmd-label{font-size:11px;color:#8b949e;margin-bottom:8px;letter-spacing:.06em;text-transform:uppercase}
+.cmd{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:12px 14px;font-family:monospace;font-size:13px;color:#79c0ff;display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px}
+.cmd span{flex:1;word-break:break-all}
+.tick-btn{background:none;border:none;color:#3fb950;font-size:16px;cursor:pointer;padding:0 4px}
+.done-badge{display:none;font-size:11px;color:#2ea043;background:#2ea04315;padding:2px 8px;border-radius:10px;border:1px solid #2ea04330}
+.step.done .done-badge{display:inline-block}
+.note{padding:12px 16px;background:#1f2d1f;border-top:1px solid #2ea04330;font-size:12px;color:#7ee787;display:flex;gap:8px}
+.warn{padding:12px 16px;background:#2d1f00;border-top:1px solid #f0883e30;font-size:12px;color:#f0883e;display:flex;gap:8px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>FinControl SaaS — Arquivos Fonte NestJS</h1>
+    <p>Crie cada arquivo na pasta indicada e rode o comando ao final</p>
+  </div>
+  <div class="progress" style="max-width:200px">
+    <div class="progress-fill" id="progressBar" style="width:0%"></div>
+  </div>
+  <span id="progressText" style="font-size:12px;color:#8b949e;white-space:nowrap">0 / 9</span>
+</div>
+
+<div class="container">
+
+<!-- STEP 1 -->
+<div class="step" id="step1">
+  <div class="step-header" onclick="toggle(1)">
+    <div class="step-num">1</div>
+    <div style="flex:1">
+      <div class="step-title">PrismaService — conexão com o banco</div>
+      <div style="margin-top:3px"><span class="step-path">src/prisma/prisma.service.ts</span> <span class="step-path">src/prisma/prisma.module.ts</span></div>
+    </div>
+    <span class="done-badge">✓ feito</span>
+  </div>
+  <div class="step-body">
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/prisma/prisma.service.ts</span><button class="copy-btn" onclick="copy(this,'code1a')">Copiar</button></div>
+      <pre id="code1a">import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { PrismaClient } from '@prisma/client';
+
+@Injectable()
+export class PrismaService extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy {
+
+  async onModuleInit() {
+    await this.$connect();
+  }
+
+  async onModuleDestroy() {
+    await this.$disconnect();
+  }
+}</pre>
+    </div>
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/prisma/prisma.module.ts</span><button class="copy-btn" onclick="copy(this,'code1b')">Copiar</button></div>
+      <pre id="code1b">import { Global, Module } from '@nestjs/common';
+import { PrismaService } from './prisma.service';
+
+@Global()
+@Module({
+  providers: [PrismaService],
+  exports: [PrismaService],
+})
+export class PrismaModule {}</pre>
+    </div>
+    <div class="cmd-block">
+      <div class="cmd-label">Criar as pastas</div>
+      <div class="cmd"><span>mkdir src\prisma</span><button class="tick-btn" onclick="markDone(1)">✓</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 2 -->
+<div class="step" id="step2">
+  <div class="step-header" onclick="toggle(2)">
+    <div class="step-num">2</div>
+    <div style="flex:1">
+      <div class="step-title">EncryptionService — AES-256-GCM + Argon2</div>
+      <div style="margin-top:3px"><span class="step-path">src/common/crypto/encryption.service.ts</span> <span class="step-path">src/common/crypto/encryption.module.ts</span></div>
+    </div>
+    <span class="done-badge">✓ feito</span>
+  </div>
+  <div class="step-body">
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/common/crypto/encryption.service.ts</span><button class="copy-btn" onclick="copy(this,'code2a')">Copiar</button></div>
+      <pre id="code2a">import { Injectable, OnModuleInit } from '@nestjs/common';
+import * as argon2 from 'argon2';
+import {
+  createCipheriv, createDecipheriv,
+  randomBytes, scryptSync, timingSafeEqual,
+} from 'crypto';
+
+@Injectable()
+export class EncryptionService implements OnModuleInit {
+  private readonly ALGORITHM = 'aes-256-gcm';
+  private readonly IV_LENGTH = 16;
+  private readonly TAG_LENGTH = 16;
+  private encryptionKey!: Buffer;
+
+  onModuleInit() {
+    const secret = process.env.ENCRYPTION_SECRET;
+    const salt   = process.env.ENCRYPTION_SALT;
+    if (!secret || !salt) throw new Error('ENCRYPTION_SECRET e ENCRYPTION_SALT são obrigatórios.');
+    this.encryptionKey = scryptSync(secret, salt, 32) as Buffer;
+  }
+
+  encrypt(plaintext: string): Buffer {
+    const iv     = randomBytes(this.IV_LENGTH);
+    const cipher = createCipheriv(this.ALGORITHM, this.encryptionKey, iv);
+    const enc    = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
+    const tag    = cipher.getAuthTag();
+    return Buffer.concat([iv, tag, enc]);
+  }
+
+  decrypt(buf: Buffer): string {
+    const iv         = buf.subarray(0, this.IV_LENGTH);
+    const tag        = buf.subarray(this.IV_LENGTH, this.IV_LENGTH + this.TAG_LENGTH);
+    const ciphertext = buf.subarray(this.IV_LENGTH + this.TAG_LENGTH);
+    const decipher   = createDecipheriv(this.ALGORITHM, this.encryptionKey, iv);
+    decipher.setAuthTag(tag);
+    return decipher.update(ciphertext).toString('utf8') + decipher.final('utf8');
+  }
+
+  encryptAmount(value: number): Buffer {
+    return this.encrypt(value.toFixed(8));
+  }
+
+  decryptAmount(buf: Buffer): number {
+    return parseFloat(this.decrypt(buf));
+  }
+
+  encryptTotpSecret(s: string): Buffer { return this.encrypt(s); }
+  decryptTotpSecret(b: Buffer): string { return this.decrypt(b); }
+
+  async hashPassword(password: string): Promise<string> {
+    return argon2.hash(password, {
+      type: argon2.argon2id,
+      memoryCost: 65536,
+      timeCost: 3,
+      parallelism: 4,
+    });
+  }
+
+  async verifyPassword(hash: string, password: string): Promise<boolean> {
+    try { return await argon2.verify(hash, password); }
+    catch { return false; }
+  }
+
+  safeCompare(a: string, b: string): boolean {
+    if (a.length !== b.length) return false;
+    return timingSafeEqual(Buffer.from(a), Buffer.from(b));
+  }
+}</pre>
+    </div>
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/common/crypto/encryption.module.ts</span><button class="copy-btn" onclick="copy(this,'code2b')">Copiar</button></div>
+      <pre id="code2b">import { Global, Module } from '@nestjs/common';
+import { EncryptionService } from './encryption.service';
+
+@Global()
+@Module({
+  providers: [EncryptionService],
+  exports: [EncryptionService],
+})
+export class EncryptionModule {}</pre>
+    </div>
+    <div class="cmd-block">
+      <div class="cmd-label">Criar as pastas</div>
+      <div class="cmd"><span>mkdir src\common\crypto</span><button class="tick-btn" onclick="markDone(2)">✓</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 3 -->
+<div class="step" id="step3">
+  <div class="step-header" onclick="toggle(3)">
+    <div class="step-num">3</div>
+    <div style="flex:1">
+      <div class="step-title">AuthService + AuthController + AuthModule</div>
+      <div style="margin-top:3px"><span class="step-path">src/auth/</span></div>
+    </div>
+    <span class="done-badge">✓ feito</span>
+  </div>
+  <div class="step-body">
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/auth/auth.service.ts</span><button class="copy-btn" onclick="copy(this,'code3a')">Copiar</button></div>
+      <pre id="code3a">import {
+  Injectable, UnauthorizedException,
+  ForbiddenException, Logger,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+import { authenticator } from 'otplib';
+import { PrismaService } from '../prisma/prisma.service';
+import { EncryptionService } from '../common/crypto/encryption.service';
+
+@Injectable()
+export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly jwt: JwtService,
+    private readonly config: ConfigService,
+    private readonly encryption: EncryptionService,
+  ) {}
+
+  async login(tenantSlug: string, email: string, password: string, totpCode?: string) {
+    const tenant = await this.prisma.tenant.findUnique({ where: { slug: tenantSlug } });
+    if (!tenant?.isActive) throw new UnauthorizedException('Tenant não encontrado ou inativo.');
+
+    const user = await this.prisma.user.findUnique({
+      where: { tenantId_email: { tenantId: tenant.id, email } },
+    });
+
+    const dummy = '$argon2id$v=19$m=65536,t=3,p=4$AAAA$BBBB';
+    if (!user) {
+      await this.encryption.verifyPassword(dummy, password);
+      throw new UnauthorizedException('Credenciais inválidas.');
+    }
+
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      throw new ForbiddenException('Conta bloqueada por excesso de tentativas.');
+    }
+
+    const valid = await this.encryption.verifyPassword(user.passwordHash, password);
+    if (!valid) {
+      const count = user.failedLoginCount + 1;
+      const locked = count >= 5 ? new Date(Date.now() + 15 * 60 * 1000) : null;
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { failedLoginCount: count, lockedUntil: locked },
+      });
+      throw new UnauthorizedException('Credenciais inválidas.');
+    }
+
+    if (user.totpEnabled && user.totpSecret) {
+      if (!totpCode) throw new UnauthorizedException('Código 2FA obrigatório.');
+      const secret = this.encryption.decryptTotpSecret(user.totpSecret);
+      if (!authenticator.verify({ token: totpCode, secret })) {
+        throw new UnauthorizedException('Código 2FA inválido.');
+      }
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { failedLoginCount: 0, lockedUntil: null, lastLoginAt: new Date() },
+    });
+
+    return this.issueTokens(user.id, tenant.id, user.role);
+  }
+
+  private async issueTokens(userId: string, tenantId: string, role: string) {
+    const payload = { sub: userId, tenantId, role };
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwt.signAsync(payload, {
+        secret: this.config.get('JWT_SECRET'),
+        expiresIn: '15m',
+      }),
+      this.jwt.signAsync(payload, {
+        secret: this.config.get('JWT_REFRESH_SECRET'),
+        expiresIn: '7d',
+      }),
+    ]);
+    const hash = await this.encryption.hashPassword(refreshToken);
+    await this.prisma.user.update({ where: { id: userId }, data: { refreshTokenHash: hash } });
+    return { accessToken, refreshToken };
+  }
+
+  async refreshTokens(refreshToken: string) {
+    let payload: any;
+    try {
+      payload = await this.jwt.verifyAsync(refreshToken, {
+        secret: this.config.get('JWT_REFRESH_SECRET'),
+      });
+    } catch {
+      throw new UnauthorizedException('Refresh token inválido.');
+    }
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+      select: { id: true, role: true, refreshTokenHash: true },
+    });
+    if (!user?.refreshTokenHash) throw new UnauthorizedException('Sessão encerrada.');
+    const ok = await this.encryption.verifyPassword(user.refreshTokenHash, refreshToken);
+    if (!ok) {
+      await this.prisma.user.update({ where: { id: user.id }, data: { refreshTokenHash: null } });
+      throw new UnauthorizedException('Token inválido. Sessão encerrada.');
+    }
+    return this.issueTokens(user.id, payload.tenantId, user.role);
+  }
+
+  async logout(userId: string) {
+    await this.prisma.user.update({ where: { id: userId }, data: { refreshTokenHash: null } });
+  }
+
+  async me(userId: string, tenantId: string) {
+    return this.prisma.user.findFirst({
+      where: { id: userId, tenantId },
+      select: { id: true, name: true, email: true, role: true, totpEnabled: true, lastLoginAt: true },
+    });
+  }
+}</pre>
+    </div>
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/auth/auth.controller.ts</span><button class="copy-btn" onclick="copy(this,'code3b')">Copiar</button></div>
+      <pre id="code3b">import {
+  Controller, Post, Get, Body, Req, Res,
+  HttpCode, UnauthorizedException,
+} from '@nestjs/common';
+import { Request, Response } from 'express';
+import { AuthService } from './auth.service';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+
+class LoginDto {
+  tenantSlug: string;
+  email: string;
+  password: string;
+  totpCode?: string;
+}
+
+@Controller('auth')
+export class AuthController {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly jwt: JwtService,
+    private readonly config: ConfigService,
+  ) {}
+
+  @Post('login')
+  @HttpCode(200)
+  async login(@Body() body: LoginDto, @Res({ passthrough: true }) res: Response) {
+    const tokens = await this.authService.login(
+      body.tenantSlug, body.email, body.password, body.totpCode,
+    );
+    const isProd = process.env.NODE_ENV === 'production';
+    res.cookie('access_token', tokens.accessToken, {
+      httpOnly: true, secure: isProd, sameSite: 'strict',
+      maxAge: 15 * 60 * 1000, path: '/',
+    });
+    res.cookie('refresh_token', tokens.refreshToken, {
+      httpOnly: true, secure: isProd, sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, path: '/api/v1/auth/refresh',
+    });
+    return { message: 'Login realizado com sucesso.' };
+  }
+
+  @Post('refresh')
+  @HttpCode(200)
+  async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const token = req.cookies?.['refresh_token'];
+    if (!token) throw new UnauthorizedException('Refresh token não encontrado.');
+    const tokens = await this.authService.refreshTokens(token);
+    res.cookie('access_token', tokens.accessToken, {
+      httpOnly: true, secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict', maxAge: 15 * 60 * 1000, path: '/',
+    });
+    return { message: 'Token renovado.' };
+  }
+
+  @Post('logout')
+  @HttpCode(200)
+  async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const token = req.cookies?.['access_token'];
+    if (token) {
+      try {
+        const payload: any = await this.jwt.verifyAsync(token, {
+          secret: this.config.get('JWT_SECRET'),
+        });
+        await this.authService.logout(payload.sub);
+      } catch {}
+    }
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+    return { message: 'Logout realizado.' };
+  }
+
+  @Get('me')
+  async me(@Req() req: Request) {
+    const token = req.cookies?.['access_token'];
+    if (!token) throw new UnauthorizedException();
+    const payload: any = await this.jwt.verifyAsync(token, {
+      secret: this.config.get('JWT_SECRET'),
+    }).catch(() => { throw new UnauthorizedException(); });
+    return this.authService.me(payload.sub, payload.tenantId);
+  }
+}</pre>
+    </div>
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/auth/auth.module.ts</span><button class="copy-btn" onclick="copy(this,'code3c')">Copiar</button></div>
+      <pre id="code3c">import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule } from '@nestjs/config';
+import { AuthService } from './auth.service';
+import { AuthController } from './auth.controller';
+
+@Module({
+  imports: [
+    ConfigModule,
+    JwtModule.register({}),
+  ],
+  providers: [AuthService],
+  controllers: [AuthController],
+  exports: [AuthService, JwtModule],
+})
+export class AuthModule {}</pre>
+    </div>
+    <div class="cmd-block">
+      <div class="cmd-label">Criar pasta</div>
+      <div class="cmd"><span>mkdir src\auth</span><button class="tick-btn" onclick="markDone(3)">✓</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 4 -->
+<div class="step" id="step4">
+  <div class="step-header" onclick="toggle(4)">
+    <div class="step-num">4</div>
+    <div style="flex:1">
+      <div class="step-title">TransactionsModule — CRUD de transações</div>
+      <div style="margin-top:3px"><span class="step-path">src/transactions/</span></div>
+    </div>
+    <span class="done-badge">✓ feito</span>
+  </div>
+  <div class="step-body">
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/transactions/transactions.service.ts</span><button class="copy-btn" onclick="copy(this,'code4a')">Copiar</button></div>
+      <pre id="code4a">import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { EncryptionService } from '../common/crypto/encryption.service';
+import { TransactionType, TransactionStatus } from '@prisma/client';
+
+export class CreateTransactionDto {
+  accountId: string;
+  toAccountId?: string;
+  categoryId?: string;
+  description: string;
+  amount: number;
+  type: TransactionType;
+  status?: TransactionStatus;
+  date: string;
+  dueDate?: string;
+  tags?: string[];
+  notes?: string;
+  isRecurring?: boolean;
+}
+
+@Injectable()
+export class TransactionsService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly encryption: EncryptionService,
+  ) {}
+
+  async findAll(tenantId: string, filters?: {
+    type?: string; accountId?: string;
+    from?: string; to?: string; search?: string;
+  }) {
+    const where: any = { tenantId };
+    if (filters?.type) where.type = filters.type;
+    if (filters?.accountId) where.accountId = filters.accountId;
+    if (filters?.from || filters?.to) {
+      where.date = {};
+      if (filters.from) where.date.gte = new Date(filters.from);
+      if (filters.to)   where.date.lte = new Date(filters.to);
+    }
+    if (filters?.search) {
+      where.description = { contains: filters.search, mode: 'insensitive' };
+    }
+
+    const txs = await this.prisma.transaction.findMany({
+      where,
+      include: { category: true, account: true, toAccount: true },
+      orderBy: { date: 'desc' },
+      take: 100,
+    });
+
+    return txs.map(tx => ({
+      ...tx,
+      amount: this.encryption.decryptAmount(tx.encryptedAmount),
+      encryptedAmount: undefined,
+    }));
+  }
+
+  async findOne(tenantId: string, id: string) {
+    const tx = await this.prisma.transaction.findFirst({
+      where: { id, tenantId },
+      include: { category: true, account: true, toAccount: true, document: true },
+    });
+    if (!tx) throw new NotFoundException('Transação não encontrada.');
+    return { ...tx, amount: this.encryption.decryptAmount(tx.encryptedAmount), encryptedAmount: undefined };
+  }
+
+  async create(tenantId: string, dto: CreateTransactionDto) {
+    await this.guardAccount(tenantId, dto.accountId);
+
+    const tx = await this.prisma.transaction.create({
+      data: {
+        tenantId,
+        accountId: dto.accountId,
+        toAccountId: dto.toAccountId,
+        categoryId: dto.categoryId,
+        description: dto.description,
+        encryptedAmount: this.encryption.encryptAmount(Math.abs(dto.amount)),
+        type: dto.type,
+        status: dto.status ?? 'COMPLETED',
+        date: new Date(dto.date),
+        dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
+        tags: dto.tags ?? [],
+        notes: dto.notes,
+        isRecurring: dto.isRecurring ?? false,
+      },
+    });
+
+    return { ...tx, amount: dto.amount, encryptedAmount: undefined };
+  }
+
+  async update(tenantId: string, id: string, dto: Partial<CreateTransactionDto>) {
+    await this.findOne(tenantId, id);
+    const data: any = { ...dto };
+    if (dto.amount !== undefined) {
+      data.encryptedAmount = this.encryption.encryptAmount(Math.abs(dto.amount));
+      delete data.amount;
+    }
+    if (dto.date) data.date = new Date(dto.date);
+    return this.prisma.transaction.update({ where: { id }, data });
+  }
+
+  async remove(tenantId: string, id: string) {
+    await this.findOne(tenantId, id);
+    await this.prisma.transaction.delete({ where: { id } });
+    return { message: 'Transação removida.' };
+  }
+
+  async summary(tenantId: string, month?: string) {
+    const now = month ? new Date(month + '-01') : new Date();
+    const from = new Date(now.getFullYear(), now.getMonth(), 1);
+    const to   = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+    const txs = await this.prisma.transaction.findMany({
+      where: { tenantId, date: { gte: from, lte: to }, status: 'COMPLETED' },
+    });
+
+    let income = 0, expense = 0;
+    for (const tx of txs) {
+      const amt = this.encryption.decryptAmount(tx.encryptedAmount);
+      if (tx.type === 'INCOME' || tx.type === 'PIX_IN') income += amt;
+      else if (tx.type === 'EXPENSE' || tx.type === 'PIX_OUT') expense += amt;
+    }
+
+    return {
+      month: from.toISOString().substring(0, 7),
+      income: Math.round(income * 100) / 100,
+      expense: Math.round(expense * 100) / 100,
+      balance: Math.round((income - expense) * 100) / 100,
+      count: txs.length,
+    };
+  }
+
+  private async guardAccount(tenantId: string, accountId: string) {
+    const acc = await this.prisma.account.findFirst({ where: { id: accountId, tenantId } });
+    if (!acc) throw new ForbiddenException('Conta não pertence a este tenant.');
+  }
+}</pre>
+    </div>
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/transactions/transactions.controller.ts</span><button class="copy-btn" onclick="copy(this,'code4b')">Copiar</button></div>
+      <pre id="code4b">import {
+  Controller, Get, Post, Put, Delete,
+  Body, Param, Query, Req, UseGuards,
+} from '@nestjs/common';
+import { TransactionsService, CreateTransactionDto } from './transactions.service';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+
+@Controller('transactions')
+@UseGuards(JwtAuthGuard)
+export class TransactionsController {
+  constructor(private readonly svc: TransactionsService) {}
+
+  @Get()
+  findAll(@Req() req: any, @Query() q: any) {
+    return this.svc.findAll(req.tenantId, q);
+  }
+
+  @Get('summary')
+  summary(@Req() req: any, @Query('month') month?: string) {
+    return this.svc.summary(req.tenantId, month);
+  }
+
+  @Get(':id')
+  findOne(@Req() req: any, @Param('id') id: string) {
+    return this.svc.findOne(req.tenantId, id);
+  }
+
+  @Post()
+  create(@Req() req: any, @Body() dto: CreateTransactionDto) {
+    return this.svc.create(req.tenantId, dto);
+  }
+
+  @Put(':id')
+  update(@Req() req: any, @Param('id') id: string, @Body() dto: Partial<CreateTransactionDto>) {
+    return this.svc.update(req.tenantId, id, dto);
+  }
+
+  @Delete(':id')
+  remove(@Req() req: any, @Param('id') id: string) {
+    return this.svc.remove(req.tenantId, id);
+  }
+}</pre>
+    </div>
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/transactions/transactions.module.ts</span><button class="copy-btn" onclick="copy(this,'code4c')">Copiar</button></div>
+      <pre id="code4c">import { Module } from '@nestjs/common';
+import { TransactionsService } from './transactions.service';
+import { TransactionsController } from './transactions.controller';
+
+@Module({
+  providers: [TransactionsService],
+  controllers: [TransactionsController],
+})
+export class TransactionsModule {}</pre>
+    </div>
+    <div class="cmd-block">
+      <div class="cmd"><span>mkdir src\transactions</span><button class="tick-btn" onclick="markDone(4)">✓</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 5 -->
+<div class="step" id="step5">
+  <div class="step-header" onclick="toggle(5)">
+    <div class="step-num">5</div>
+    <div style="flex:1">
+      <div class="step-title">JwtAuthGuard — proteção das rotas</div>
+      <div style="margin-top:3px"><span class="step-path">src/common/guards/jwt-auth.guard.ts</span></div>
+    </div>
+    <span class="done-badge">✓ feito</span>
+  </div>
+  <div class="step-body">
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/common/guards/jwt-auth.guard.ts</span><button class="copy-btn" onclick="copy(this,'code5a')">Copiar</button></div>
+      <pre id="code5a">import {
+  Injectable, CanActivate, ExecutionContext,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
+
+@Injectable()
+export class JwtAuthGuard implements CanActivate {
+  constructor(
+    private readonly jwt: JwtService,
+    private readonly config: ConfigService,
+  ) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const req = context.switchToHttp().getRequest();
+
+    // Try cookie first, then Authorization header
+    let token = req.cookies?.['access_token'];
+    if (!token) {
+      const auth = req.headers?.authorization;
+      if (auth?.startsWith('Bearer ')) token = auth.slice(7);
+    }
+
+    if (!token) throw new UnauthorizedException('Token não encontrado.');
+
+    try {
+      const payload = await this.jwt.verifyAsync(token, {
+        secret: this.config.get('JWT_SECRET'),
+      });
+      req.user = payload;
+      req.tenantId = payload.tenantId;
+      return true;
+    } catch {
+      throw new UnauthorizedException('Token inválido ou expirado.');
+    }
+  }
+}</pre>
+    </div>
+    <div class="cmd-block">
+      <div class="cmd"><span>mkdir src\common\guards</span><button class="tick-btn" onclick="markDone(5)">✓</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 6 -->
+<div class="step" id="step6">
+  <div class="step-header" onclick="toggle(6)">
+    <div class="step-num">6</div>
+    <div style="flex:1">
+      <div class="step-title">AccountsModule — gestão de contas</div>
+      <div style="margin-top:3px"><span class="step-path">src/accounts/</span></div>
+    </div>
+    <span class="done-badge">✓ feito</span>
+  </div>
+  <div class="step-body">
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/accounts/accounts.service.ts</span><button class="copy-btn" onclick="copy(this,'code6a')">Copiar</button></div>
+      <pre id="code6a">import { Injectable, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { EncryptionService } from '../common/crypto/encryption.service';
+import { AccountType } from '@prisma/client';
+
+export class CreateAccountDto {
+  name: string;
+  type: AccountType;
+  balance?: number;
+  currency?: string;
+  pixKey?: string;
+  pixKeyType?: string;
+  bankCode?: string;
+  color?: string;
+  icon?: string;
+}
+
+@Injectable()
+export class AccountsService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly encryption: EncryptionService,
+  ) {}
+
+  async findAll(tenantId: string) {
+    const accounts = await this.prisma.account.findMany({
+      where: { tenantId, isActive: true },
+      orderBy: { name: 'asc' },
+    });
+    return accounts.map(a => ({
+      ...a,
+      balance: this.encryption.decryptAmount(a.encryptedBalance),
+      encryptedBalance: undefined,
+      pixKey: a.pixKey ? this.encryption.decrypt(a.pixKey) : undefined,
+    }));
+  }
+
+  async create(tenantId: string, dto: CreateAccountDto) {
+    return this.prisma.account.create({
+      data: {
+        tenantId,
+        name: dto.name,
+        type: dto.type,
+        encryptedBalance: this.encryption.encryptAmount(dto.balance ?? 0),
+        currency: dto.currency ?? 'BRL',
+        pixKey: dto.pixKey ? this.encryption.encrypt(dto.pixKey) : undefined,
+        pixKeyType: dto.pixKeyType,
+        bankCode: dto.bankCode,
+        color: dto.color,
+        icon: dto.icon,
+      },
+    });
+  }
+
+  async remove(tenantId: string, id: string) {
+    const acc = await this.prisma.account.findFirst({ where: { id, tenantId } });
+    if (!acc) throw new NotFoundException('Conta não encontrada.');
+    await this.prisma.account.update({ where: { id }, data: { isActive: false } });
+    return { message: 'Conta desativada.' };
+  }
+}</pre>
+    </div>
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/accounts/accounts.controller.ts</span><button class="copy-btn" onclick="copy(this,'code6b')">Copiar</button></div>
+      <pre id="code6b">import { Controller, Get, Post, Delete, Body, Param, Req, UseGuards } from '@nestjs/common';
+import { AccountsService, CreateAccountDto } from './accounts.service';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+
+@Controller('accounts')
+@UseGuards(JwtAuthGuard)
+export class AccountsController {
+  constructor(private readonly svc: AccountsService) {}
+
+  @Get()
+  findAll(@Req() req: any) { return this.svc.findAll(req.tenantId); }
+
+  @Post()
+  create(@Req() req: any, @Body() dto: CreateAccountDto) {
+    return this.svc.create(req.tenantId, dto);
+  }
+
+  @Delete(':id')
+  remove(@Req() req: any, @Param('id') id: string) {
+    return this.svc.remove(req.tenantId, id);
+  }
+}</pre>
+    </div>
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/accounts/accounts.module.ts</span><button class="copy-btn" onclick="copy(this,'code6c')">Copiar</button></div>
+      <pre id="code6c">import { Module } from '@nestjs/common';
+import { AccountsService } from './accounts.service';
+import { AccountsController } from './accounts.controller';
+
+@Module({
+  providers: [AccountsService],
+  controllers: [AccountsController],
+})
+export class AccountsModule {}</pre>
+    </div>
+    <div class="cmd-block">
+      <div class="cmd"><span>mkdir src\accounts</span><button class="tick-btn" onclick="markDone(6)">✓</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 7 -->
+<div class="step" id="step7">
+  <div class="step-header" onclick="toggle(7)">
+    <div class="step-num">7</div>
+    <div style="flex:1">
+      <div class="step-title">app.module.ts — módulo raiz atualizado</div>
+      <div style="margin-top:3px"><span class="step-path">src/app.module.ts</span></div>
+    </div>
+    <span class="done-badge">✓ feito</span>
+  </div>
+  <div class="step-body">
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/app.module.ts</span><button class="copy-btn" onclick="copy(this,'code7a')">Copiar</button></div>
+      <pre id="code7a">import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { PrismaModule } from './prisma/prisma.module';
+import { EncryptionModule } from './common/crypto/encryption.module';
+import { AuthModule } from './auth/auth.module';
+import { AccountsModule } from './accounts/accounts.module';
+import { TransactionsModule } from './transactions/transactions.module';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true, cache: true }),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 100 }]),
+    PrismaModule,
+    EncryptionModule,
+    AuthModule,
+    AccountsModule,
+    TransactionsModule,
+  ],
+})
+export class AppModule {}</pre>
+    </div>
+    <div class="note">⚠️ Substitua o conteúdo completo do <code>app.module.ts</code> existente por este.</div>
+    <div class="cmd-block">
+      <div class="cmd"><span>(apenas abrir e substituir o arquivo)</span><button class="tick-btn" onclick="markDone(7)">✓</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 8 -->
+<div class="step" id="step8">
+  <div class="step-header" onclick="toggle(8)">
+    <div class="step-num">8</div>
+    <div style="flex:1">
+      <div class="step-title">main.ts — bootstrap com Helmet + CORS + Cookies</div>
+      <div style="margin-top:3px"><span class="step-path">src/main.ts</span></div>
+    </div>
+    <span class="done-badge">✓ feito</span>
+  </div>
+  <div class="step-body">
+    <div class="file-block">
+      <div class="file-toolbar"><span class="file-name">src/main.ts</span><button class="copy-btn" onclick="copy(this,'code8a')">Copiar</button></div>
+      <pre id="code8a">import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
+import helmet from 'helmet';
+import * as cookieParser from 'cookie-parser';
+import { AppModule } from './app.module';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+
+  app.use(helmet({ contentSecurityPolicy: false }));
+  app.use(cookieParser());
+
+  app.enableCors({
+    origin: process.env.ALLOWED_ORIGINS?.split(',') ?? ['http://localhost:3000'],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  });
+
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    transform: true,
+    transformOptions: { enableImplicitConversion: true },
+  }));
+
+  app.setGlobalPrefix('api/v1');
+
+  const port = process.env.PORT ?? 3000;
+  await app.listen(port);
+  console.log(`\n🚀 FinControl API rodando em http://localhost:${port}/api/v1\n`);
+}
+
+bootstrap();</pre>
+    </div>
+    <div class="note">⚠️ Substitua o <code>src/main.ts</code> existente por este.</div>
+    <div class="cmd-block">
+      <div class="cmd"><span>(apenas abrir e substituir o arquivo)</span><button class="tick-btn" onclick="markDone(8)">✓</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- STEP 9 -->
+<div class="step" id="step9">
+  <div class="step-header" onclick="toggle(9)">
+    <div class="step-num">9</div>
+    <div style="flex:1">
+      <div class="step-title">Instalar dependências + iniciar</div>
+    </div>
+    <span class="done-badge">✓ feito</span>
+  </div>
+  <div class="step-body">
+    <div class="cmd-block">
+      <div class="cmd-label">No terminal (dentro de fincontrol-saas\fincontrol-saas)</div>
+      <div class="cmd"><span>npm install @nestjs/config @nestjs/jwt @nestjs/throttler helmet cookie-parser otplib argon2</span><button class="tick-btn">✓</button></div>
+      <div class="cmd"><span>npm install -D @types/cookie-parser</span><button class="tick-btn">✓</button></div>
+      <div class="cmd"><span>npm run start:dev</span><button class="tick-btn" onclick="markDone(9)">✓</button></div>
+    </div>
+    <div class="note">✅ Quando aparecer "🚀 FinControl API rodando", teste: <strong>POST http://localhost:3000/api/v1/auth/login</strong></div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+let done = new Set();
+
+function toggle(n) {
+  const el = document.getElementById('step'+n);
+  el.classList.toggle('open');
+}
+
+function copy(btn, id) {
+  const text = document.getElementById(id).textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copiado!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function markDone(n) {
+  done.add(n);
+  const el = document.getElementById('step'+n);
+  el.classList.add('done');
+  el.classList.remove('open');
+  const pct = Math.round(done.size / 9 * 100);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressText').textContent = done.size + ' / 9';
+  if (done.size === 9) {
+    document.getElementById('progressText').textContent = '✅ Concluído!';
+    document.getElementById('progressText').style.color = '#2ea043';
+  }
+}
+
+// Auto-open first step
+toggle(1);
+</script>
+</body>
+</html>

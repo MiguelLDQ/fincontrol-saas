@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinControl — Controle Financeiro Inteligente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#05080f;--surface:#0b1120;--surface2:#111d30;--border:#1a2d4a;--border2:#243d5f;
+  --text:#e8eef8;--text2:#7d96b8;--text3:#3d5470;
+  --accent:#00d4aa;--accent2:#0084ff;--danger:#ff4d6a;--warn:#f5a623;
+  --serif:'Instrument Serif',Georgia,serif;--sans:'Geist',system-ui,sans-serif;--mono:'Geist Mono',monospace;
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;overflow-x:hidden}
+button,input{font-family:var(--sans)}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+.view{display:none;min-height:100vh}.view.active{display:block}
+
+/* LANDING */
+.grid-bg{position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:60px 60px;opacity:.2;pointer-events:none;z-index:0}
+.glow{position:fixed;width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,#00d4aa15 0%,transparent 70%);top:-250px;left:50%;transform:translateX(-50%);pointer-events:none;z-index:0}
+.nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 40px;display:flex;align-items:center;background:linear-gradient(to bottom,var(--bg),transparent)}
+.nav-logo{font-family:var(--serif);font-size:22px;color:var(--text)}
+.nav-logo span{color:var(--accent)}
+.nav-links{display:flex;gap:8px;margin-left:auto}
+.nav-btn{background:none;border:1px solid var(--border2);color:var(--text2);padding:8px 20px;border-radius:8px;font-size:14px;cursor:pointer;transition:.15s}
+.nav-btn:hover{border-color:var(--accent);color:var(--text)}
+.nav-btn.primary{background:var(--accent);border-color:var(--accent);color:#000;font-weight:500}
+.hero{position:relative;z-index:1;padding:160px 40px 80px;text-align:center;max-width:860px;margin:0 auto}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:#00d4aa15;border:1px solid #00d4aa30;color:var(--accent);font-size:12px;padding:5px 14px;border-radius:20px;margin-bottom:28px;font-family:var(--mono)}
+.hero-badge::before{content:'●';font-size:8px;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-family:var(--serif);font-size:clamp(44px,6vw,78px);font-weight:400;line-height:1.08;margin-bottom:20px;letter-spacing:-.03em}
+.hero h1 em{font-style:italic;color:var(--accent)}
+.hero p{font-size:18px;color:var(--text2);max-width:520px;margin:0 auto 40px;line-height:1.6}
+.hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:var(--accent);color:#000;padding:14px 32px;border-radius:10px;font-size:15px;font-weight:600;border:none;cursor:pointer;transition:.15s}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-ghost{background:none;color:var(--text2);padding:14px 24px;border-radius:10px;font-size:15px;border:1px solid var(--border2);cursor:pointer;transition:.15s}
+.btn-ghost:hover{color:var(--text);border-color:var(--text3)}
+
+/* PRICE HIGHLIGHT */
+.price-section{position:relative;z-index:1;padding:60px 40px;max-width:860px;margin:0 auto;text-align:center}
+.price-card{background:var(--surface);border:1px solid var(--accent);border-radius:20px;padding:48px;max-width:480px;margin:0 auto;position:relative}
+.price-label{font-size:11px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;font-family:var(--mono);margin-bottom:16px}
+.price-amount{font-family:var(--serif);font-size:80px;color:var(--text);letter-spacing:-.04em;line-height:1}
+.price-amount sup{font-size:32px;vertical-align:super;font-family:var(--sans);font-weight:400}
+.price-once{font-size:14px;color:var(--text3);margin-top:8px;margin-bottom:32px}
+.price-features{display:flex;flex-direction:column;gap:12px;margin-bottom:36px;text-align:left}
+.pf{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--text2)}
+.pf::before{content:'✓';color:var(--accent);font-weight:700;font-size:16px;flex-shrink:0}
+.price-cta{width:100%;background:var(--accent);color:#000;padding:16px;border-radius:12px;font-size:16px;font-weight:600;border:none;cursor:pointer;transition:.15s}
+.price-cta:hover{opacity:.9}
+.price-trial{margin-top:16px;font-size:13px;color:var(--text3)}
+.price-trial strong{color:var(--warn)}
+
+/* FEATURES */
+.features{position:relative;z-index:1;padding:60px 40px;max-width:1060px;margin:0 auto}
+.section-label{font-size:11px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;font-family:var(--mono);margin-bottom:10px}
+.section-title{font-family:var(--serif);font-size:clamp(30px,4vw,48px);margin-bottom:40px;letter-spacing:-.02em}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+.fc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:22px;transition:.18s}
+.fc:hover{border-color:var(--border2);transform:translateY(-2px)}
+.fc-icon{font-size:22px;margin-bottom:12px}
+.fc-title{font-size:14px;font-weight:500;margin-bottom:5px}
+.fc-desc{font-size:13px;color:var(--text2);line-height:1.55}
+
+/* TRIAL BANNER */
+.trial-banner{position:relative;z-index:1;margin:0 40px 60px;max-width:980px;margin-left:auto;margin-right:auto;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.tb-text h3{font-family:var(--serif);font-size:26px;margin-bottom:4px}
+.tb-text p{font-size:13px;color:var(--text2)}
+footer{position:relative;z-index:1;padding:32px 40px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.footer-logo{font-family:var(--serif);font-size:18px}.footer-logo span{color:var(--accent)}
+.footer-note{font-size:12px;color:var(--text3)}
+
+/* AUTH MODAL */
+.modal-overlay{position:fixed;inset:0;background:#00000095;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:36px;width:100%;max-width:420px;animation:slideUp .2s ease;position:relative}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.modal-logo{font-family:var(--serif);font-size:20px;text-align:center;margin-bottom:4px}
+.modal-logo span{color:var(--accent)}
+.modal-sub{font-size:13px;color:var(--text3);text-align:center;margin-bottom:24px}
+.modal-tabs{display:flex;gap:4px;background:var(--surface2);border-radius:8px;padding:3px;margin-bottom:22px}
+.modal-tab{flex:1;padding:8px;border:none;background:none;color:var(--text3);font-size:13px;border-radius:6px;cursor:pointer;transition:.12s}
+.modal-tab.active{background:var(--surface);color:var(--text);font-weight:500}
+.fg{margin-bottom:13px}
+.fl{display:block;font-size:12px;color:var(--text3);margin-bottom:5px}
+.fi{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:11px 13px;border-radius:8px;font-size:14px;outline:none;transition:.12s}
+.fi:focus{border-color:var(--accent2)}
+.fi::placeholder{color:var(--text3)}
+.fb{width:100%;background:var(--accent);color:#000;padding:13px;border-radius:8px;font-size:15px;font-weight:600;border:none;cursor:pointer;margin-top:4px;transition:.15s}
+.fb:hover{opacity:.9}.fb:disabled{opacity:.5;cursor:not-allowed}
+.ferr{background:#ff4d6a15;border:1px solid #ff4d6a30;color:var(--danger);font-size:13px;padding:10px 13px;border-radius:8px;margin-top:10px}
+.fsuc{background:#00d4aa15;border:1px solid #00d4aa30;color:var(--accent);font-size:13px;padding:10px 13px;border-radius:8px;margin-top:10px}
+.modal-close{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--text3);cursor:pointer;font-size:22px;padding:2px 6px}
+.trial-note{text-align:center;font-size:12px;color:var(--text3);margin-top:10px}
+.trial-note strong{color:var(--accent)}
+
+/* DASHBOARD */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:220px;min-width:220px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column}
+.sidebar-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border);font-family:var(--serif);font-size:18px}
+.sidebar-logo span{color:var(--accent)}
+.snav{flex:1;padding:8px 0;overflow-y:auto}
+.ns{padding:14px 16px 4px;font-size:10px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase}
+.ni{display:flex;align-items:center;gap:10px;padding:9px 16px;color:var(--text2);font-size:13px;border:none;background:none;width:100%;text-align:left;border-left:2px solid transparent;cursor:pointer;transition:.12s}
+.ni:hover{color:var(--text);background:var(--surface2)}
+.ni.active{color:var(--text);background:var(--surface2);border-left-color:var(--accent)}
+.ni svg{width:15px;height:15px;flex-shrink:0}
+
+/* Trial / Lifetime pill */
+.status-pill{margin:8px 12px 12px;border-radius:10px;padding:12px}
+.status-pill.trial{background:linear-gradient(135deg,#f5a62315,#f5a62308);border:1px solid #f5a62330}
+.status-pill.lifetime{background:linear-gradient(135deg,#00d4aa15,#00d4aa05);border:1px solid #00d4aa30}
+.sp-label{font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono);margin-bottom:4px}
+.trial .sp-label{color:var(--warn)}.lifetime .sp-label{color:var(--accent)}
+.sp-value{font-family:var(--serif);font-size:20px;color:var(--text)}
+.sp-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.sp-btn{width:100%;margin-top:10px;border:none;padding:7px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s}
+.trial .sp-btn{background:var(--warn);color:#000}
+.lifetime .sp-btn{background:var(--accent);color:#000;opacity:.7;cursor:default}
+
+/* MAIN */
+.main-area{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:52px;border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;background:var(--surface);flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:500;flex:1}
+.topbar-user{font-size:13px;color:var(--text3)}
+.logout-btn{background:none;border:1px solid var(--border);color:var(--text3);padding:5px 12px;border-radius:6px;font-size:12px;cursor:pointer;transition:.15s}
+.logout-btn:hover{color:var(--danger);border-color:var(--danger)}
+.content{flex:1;overflow-y:auto;padding:24px}
+.dv{display:none}.dv.active{display:block;animation:fadeIn .18s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;position:relative;overflow:hidden}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kpi.green::before{background:var(--accent)}.kpi.blue::before{background:var(--accent2)}
+.kpi.red::before{background:var(--danger)}.kpi.amber::before{background:var(--warn)}
+.kpi-label{font-size:11px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;margin-bottom:7px}
+.kpi-value{font-family:var(--mono);font-size:22px;font-weight:500}
+
+/* CARDS */
+.g2{display:grid;grid-template-columns:1.3fr 1fr;gap:15px;margin-bottom:15px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}
+.ct{font-size:13px;font-weight:500}
+.ca{font-size:12px;color:var(--accent2);background:none;border:none;cursor:pointer}
+
+/* TX */
+.tx-list{display:flex;flex-direction:column;gap:2px}
+.tx-row{display:flex;align-items:center;gap:11px;padding:8px 9px;border-radius:8px;transition:.1s}
+.tx-row:hover{background:var(--surface2)}
+.tx-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.tx-icon.in{background:#00d4aa15}.tx-icon.out{background:#ff4d6a15}.tx-icon.trf{background:#0084ff15}
+.tx-desc{flex:1;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tx-cat{font-size:11px;color:var(--text3)}
+.tx-amt{font-family:var(--mono);font-size:13px;font-weight:500}
+.tx-amt.in{color:var(--accent)}.tx-amt.out{color:var(--danger)}
+
+/* TABLE */
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;padding:8px 12px;font-size:11px;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--border);font-weight:500}
+td{padding:10px 12px;border-bottom:1px solid var(--border);font-size:13px}
+tr:hover td{background:var(--surface2)}
+tr:last-child td{border:none}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-family:var(--mono)}
+.badge.income{background:#00d4aa15;color:var(--accent)}.badge.expense{background:#ff4d6a15;color:var(--danger)}
+.badge.transfer{background:#0084ff15;color:var(--accent2)}.badge.completed{background:#00d4aa10;color:var(--accent)}
+.badge.pending{background:#f5a62315;color:var(--warn)}
+
+/* FILTERS */
+.filters{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.filter-btn{background:var(--surface);border:1px solid var(--border);color:var(--text2);padding:6px 14px;border-radius:20px;font-size:12px;cursor:pointer;transition:.12s}
+.filter-btn.active,.filter-btn:hover{border-color:var(--accent2);color:var(--text)}
+.si{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:8px;font-size:13px;outline:none;width:200px}
+.si:focus{border-color:var(--accent2)}
+.si::placeholder{color:var(--text3)}
+
+/* INV */
+.inv-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:8px;transition:.1s}
+.inv-row:hover{background:var(--surface2)}
+
+/* LOADING / EMPTY */
+.loading{display:flex;align-items:center;justify-content:center;padding:36px;color:var(--text3);gap:8px}
+.spinner{width:18px;height:18px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:36px 20px;color:var(--text3)}
+.empty-icon{font-size:30px;margin-bottom:10px;opacity:.5}
+
+/* BILLING */
+.billing-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:16px}
+.pix-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;margin:14px 0;word-break:break-all;font-family:var(--mono);font-size:12px;color:var(--text2);line-height:1.5;max-height:100px;overflow-y:auto}
+.copy-btn{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:10px;border-radius:8px;font-size:13px;cursor:pointer;transition:.15s;margin-bottom:8px}
+.copy-btn:hover{border-color:var(--accent2);color:var(--text)}.copy-btn.copied{border-color:var(--accent);color:var(--accent)}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--accent);color:var(--text);padding:12px 18px;border-radius:10px;font-size:13px;display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(8px);transition:.3s;z-index:999;pointer-events:none}
+.toast.show{opacity:1;transform:none}
+.toast.error{border-color:var(--danger)}
+.toast-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:var(--accent)}
+.toast.error .toast-dot{background:var(--danger)}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ LANDING ═══════════ -->
+<div class="view active" id="view-landing">
+  <div class="grid-bg"></div>
+  <div class="glow"></div>
+
+  <nav class="nav">
+    <div class="nav-logo">Fin<span>Control</span></div>
+    <div class="nav-links">
+      <button class="nav-btn" onclick="openAuth('login')">Entrar</button>
+      <button class="nav-btn primary" onclick="openAuth('register')">Testar grátis</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-badge">✦ 15 dias grátis com todas as funcionalidades</div>
+    <h1>Controle financeiro<br><em>de verdade.</em></h1>
+    <p>Sistema completo com IA local, OCR de recibos, investimentos e automação. Seus dados ficam na sua máquina — para sempre.</p>
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="openAuth('register')">Começar trial grátis →</button>
+      <button class="btn-ghost" onclick="openAuth('login')">Já tenho conta</button>
+    </div>
+  </section>
+
+  <!-- PRICE CARD -->
+  <section class="price-section">
+    <div class="section-label" style="margin-bottom:8px">Preço</div>
+    <div class="section-title" style="font-size:clamp(26px,3vw,36px);margin-bottom:32px">Simples assim.</div>
+    <div class="price-card">
+      <div class="price-label">✦ Acesso vitalício</div>
+      <div class="price-amount"><sup>R$</sup>30</div>
+      <div class="price-once">pagamento único — nunca mais paga nada</div>
+      <div class="price-features">
+        <div class="pf">Contas e transações ilimitadas</div>
+        <div class="pf">Assistente IA financeiro (Ollama local)</div>
+        <div class="pf">OCR de recibos e notas fiscais</div>
+        <div class="pf">Carteira de investimentos completa</div>
+        <div class="pf">Motor de regras e automação</div>
+        <div class="pf">Multicontas e múltiplos usuários</div>
+        <div class="pf">Todas as atualizações futuras</div>
+        <div class="pf">Self-hosted — seus dados são seus</div>
+      </div>
+      <button class="price-cta" onclick="openAuth('register')">Começar trial de 15 dias →</button>
+      <div class="price-trial">Trial gratuito com <strong>todas as funcionalidades</strong>. Depois, R$ 30 uma vez.</div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features">
+    <div class="section-label">O que você recebe</div>
+    <div class="section-title">Tudo que precisa,<br>nada que não precisa.</div>
+    <div class="features-grid">
+      <div class="fc"><div class="fc-icon">🧠</div><div class="fc-title">IA Financeira Local</div><div class="fc-desc">Assistente com Ollama + LLM. Pergunte sobre seus gastos, receba análises. Seus dados nunca saem da sua máquina.</div></div>
+      <div class="fc"><div class="fc-icon">📄</div><div class="fc-title">OCR de Recibos</div><div class="fc-desc">Fotografe o cupom fiscal. O sistema lê automaticamente valor, data, CNPJ e sugere criar a despesa.</div></div>
+      <div class="fc"><div class="fc-icon">⚙️</div><div class="fc-title">Automação</div><div class="fc-desc">Regras "Se X, faça Y" — categorize automaticamente, separe 20% do salário, adicione tags.</div></div>
+      <div class="fc"><div class="fc-icon">📈</div><div class="fc-title">Investimentos</div><div class="fc-desc">Acompanhe ações, FIIs, cripto e renda fixa. Cotações via APIs abertas, P&L em tempo real.</div></div>
+      <div class="fc"><div class="fc-icon">💳</div><div class="fc-title">Multicontas</div><div class="fc-desc">Corrente, poupança, cartão de crédito, carteira de investimentos — tudo em um lugar.</div></div>
+      <div class="fc"><div class="fc-icon">🔒</div><div class="fc-title">Segurança Total</div><div class="fc-desc">AES-256-GCM nos dados financeiros. Argon2id nas senhas. JWT em cookies HttpOnly. Open source.</div></div>
+    </div>
+  </section>
+
+  <div class="trial-banner">
+    <div class="tb-text">
+      <h3>15 dias grátis, sem cartão.</h3>
+      <p>Acesso completo a todas as funcionalidades. Depois, R$ 30 uma única vez.</p>
+    </div>
+    <button class="btn-primary" onclick="openAuth('register')">Criar conta grátis →</button>
+  </div>
+
+  <footer>
+    <div class="footer-logo">Fin<span>Control</span></div>
+    <div class="footer-note">Open Source · Self-Hosted · 100% seus dados</div>
+  </footer>
+</div>
+
+<!-- ═══════════ AUTH MODAL ═══════════ -->
+<div class="modal-overlay" id="authModal" style="display:none" onclick="closeAuthOverlay(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAuth()">×</button>
+    <div class="modal-logo">Fin<span>Control</span></div>
+    <div class="modal-sub" id="authSub">Acesse sua conta</div>
+    <div class="modal-tabs">
+      <button class="modal-tab" id="tabLogin" onclick="switchTab('login')">Entrar</button>
+      <button class="modal-tab" id="tabRegister" onclick="switchTab('register')">Criar conta</button>
+    </div>
+
+    <div id="formLogin">
+      <div class="fg"><label class="fl">Email</label><input class="fi" type="email" id="lEmail" placeholder="seu@email.com" autocomplete="email"></div>
+      <div class="fg"><label class="fl">Senha</label><input class="fi" type="password" id="lPassword" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="fb" id="loginBtn" onclick="doLogin()">Entrar</button>
+      <div id="loginMsg"></div>
+      <div class="trial-note">Sem conta? <button style="background:none;border:none;color:var(--accent2);cursor:pointer;font-size:12px;text-decoration:underline" onclick="switchTab('register')">Criar grátis</button></div>
+    </div>
+
+    <div id="formRegister" style="display:none">
+      <div class="fg"><label class="fl">Seu nome</label><input class="fi" type="text" id="rName" placeholder="João Silva"></div>
+      <div class="fg"><label class="fl">Email</label><input class="fi" type="email" id="rEmail" placeholder="joao@empresa.com" autocomplete="email"></div>
+      <div class="fg"><label class="fl">Senha (mín. 8 caracteres)</label><input class="fi" type="password" id="rPassword" placeholder="••••••••"></div>
+      <div class="fg"><label class="fl">Nome da empresa / workspace</label><input class="fi" type="text" id="rTenant" placeholder="Minha Empresa" onkeydown="if(event.key==='Enter')doRegister()"></div>
+      <button class="fb" id="registerBtn" onclick="doRegister()">Criar conta — 15 dias grátis</button>
+      <div id="registerMsg"></div>
+      <div class="trial-note"><strong>15 dias grátis</strong> com tudo incluso. Sem cartão.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ DASHBOARD ═══════════ -->
+<div class="view" id="view-dashboard">
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-logo">Fin<span>Control</span></div>
+      <nav class="snav">
+        <div class="ns">Principal</div>
+        <button class="ni active" onclick="navTo('overview',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Visão geral
+        </button>
+        <button class="ni" onclick="navTo('transactions',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+          Transações
+        </button>
+        <button class="ni" onclick="navTo('accounts',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
+          Contas
+        </button>
+        <button class="ni" onclick="navTo('investments',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg>
+          Investimentos
+        </button>
+        <div class="ns">Automação</div>
+        <button class="ni" onclick="navTo('rules',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+          Regras
+        </button>
+        <div class="ns">Conta</div>
+        <button class="ni" onclick="navTo('billing',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          Plano
+        </button>
+      </nav>
+      <div id="statusPill"></div>
+    </aside>
+
+    <main class="main-area">
+      <div class="topbar">
+        <div class="topbar-title" id="dashTitle">Visão geral</div>
+        <div class="topbar-user" id="topbarUser"></div>
+        <button class="logout-btn" onclick="doLogout()">Sair</button>
+      </div>
+      <div class="content">
+
+        <!-- OVERVIEW -->
+        <div class="dv active" id="dv-overview">
+          <div class="kpi-grid">
+            <div class="kpi green"><div class="kpi-label">Saldo total</div><div class="kpi-value" id="kpiSaldo">—</div></div>
+            <div class="kpi blue"><div class="kpi-label">Receitas (mês)</div><div class="kpi-value" id="kpiIncome">—</div></div>
+            <div class="kpi red"><div class="kpi-label">Despesas (mês)</div><div class="kpi-value" id="kpiExpense">—</div></div>
+            <div class="kpi amber"><div class="kpi-label">Carteira</div><div class="kpi-value" id="kpiInv">—</div></div>
+          </div>
+          <div class="g2">
+            <div class="card">
+              <div class="ch"><span class="ct">Últimas transações</span><button class="ca" onclick="navTo('transactions',null)">Ver todas →</button></div>
+              <div class="tx-list" id="recentTx"><div class="loading"><div class="spinner"></div></div></div>
+            </div>
+            <div class="card">
+              <div class="ch"><span class="ct">Contas</span></div>
+              <div id="accountWidget"><div class="loading"><div class="spinner"></div></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRANSACTIONS -->
+        <div class="dv" id="dv-transactions">
+          <div class="filters">
+            <input class="si" type="text" placeholder="Buscar..." id="txSearch" oninput="loadTransactions()">
+            <button class="filter-btn active" onclick="setTxFilter(this,'')">Todas</button>
+            <button class="filter-btn" onclick="setTxFilter(this,'INCOME')">Receitas</button>
+            <button class="filter-btn" onclick="setTxFilter(this,'EXPENSE')">Despesas</button>
+            <button class="filter-btn" onclick="setTxFilter(this,'TRANSFER')">Transferências</button>
+          </div>
+          <div class="card" style="padding:0;overflow:hidden">
+            <div class="tw"><table>
+              <thead><tr><th>Descrição</th><th>Categoria</th><th>Data</th><th>Tipo</th><th>Status</th><th style="text-align:right">Valor</th></tr></thead>
+              <tbody id="txBody"><tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
+            </table></div>
+          </div>
+        </div>
+
+        <!-- ACCOUNTS -->
+        <div class="dv" id="dv-accounts">
+          <div id="accountsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+
+        <!-- INVESTMENTS -->
+        <div class="dv" id="dv-investments">
+          <div class="kpi-grid" id="invKpis" style="grid-template-columns:repeat(3,1fr)"></div>
+          <div class="card">
+            <div class="ch"><span class="ct">Posições</span></div>
+            <div id="invList"><div class="loading"><div class="spinner"></div></div></div>
+          </div>
+        </div>
+
+        <!-- RULES -->
+        <div class="dv" id="dv-rules">
+          <div id="rulesList"><div class="loading"><div class="spinner"></div></div></div>
+        </div>
+
+        <!-- BILLING -->
+        <div class="dv" id="dv-billing">
+          <div class="billing-box" id="billingStatus"><div class="loading"><div class="spinner"></div></div></div>
+          <div id="billingAction"></div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- PIX MODAL -->
+<div class="modal-overlay" id="pixModal" style="display:none" onclick="closePixOverlay(event)">
+  <div class="modal" style="max-width:400px">
+    <button class="modal-close" onclick="closePixModal()">×</button>
+    <div class="modal-logo">Pagar com <span>Pix</span></div>
+    <div class="modal-sub">Acesso Vitalício — R$ 30,00 (único)</div>
+    <p style="font-size:13px;color:var(--text2);margin:12px 0 4px">Copie o código e cole no app do seu banco:</p>
+    <div class="pix-box" id="pixCode">—</div>
+    <button class="copy-btn" id="copyBtn" onclick="copyPix()">Copiar código Pix</button>
+    <p style="font-size:12px;color:var(--text3);text-align:center;margin-bottom:8px">Após pagar, clique no botão abaixo</p>
+    <button class="fb" onclick="confirmPayment()">✓ Já paguei — confirmar</button>
+    <div id="pixMsg" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-dot"></div><span id="toastMsg"></span></div>
+
+<script>
+const API = '/api/v1';
+let currentUser = null;
+let billingEventId = null;
+let txFilterType = '';
+
+async function req(method, path, body) {
+  const opts = { method, credentials: 'include', headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const r = await fetch(API + path, opts);
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw { status: r.status, ...data };
+  return data;
+}
+
+// ── INIT ──
+async function init() {
+  try {
+    const me = await req('GET', '/auth/me');
+    if (me?.id) { currentUser = me; showDash(); }
+    else showView('landing');
+  } catch { showView('landing'); }
+}
+
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+}
+
+// ── AUTH ──
+function openAuth(tab) { document.getElementById('authModal').style.display = 'flex'; switchTab(tab); }
+function closeAuth() { document.getElementById('authModal').style.display = 'none'; }
+function closeAuthOverlay(e) { if (e.target.id === 'authModal') closeAuth(); }
+
+function switchTab(tab) {
+  document.getElementById('formLogin').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('formRegister').style.display = tab === 'register' ? 'block' : 'none';
+  document.getElementById('tabLogin').classList.toggle('active', tab === 'login');
+  document.getElementById('tabRegister').classList.toggle('active', tab === 'register');
+  document.getElementById('authSub').textContent = tab === 'login' ? 'Acesse sua conta' : 'Criar conta — 15 dias grátis';
+  document.getElementById('loginMsg').innerHTML = '';
+  document.getElementById('registerMsg').innerHTML = '';
+}
+
+async function doLogin() {
+  const email = document.getElementById('lEmail').value.trim();
+  const password = document.getElementById('lPassword').value;
+  const btn = document.getElementById('loginBtn');
+  const msg = document.getElementById('loginMsg');
+  if (!email || !password) { msg.innerHTML = '<div class="ferr">Preencha email e senha.</div>'; return; }
+  btn.disabled = true; btn.textContent = 'Entrando...'; msg.innerHTML = '';
+  try {
+    await req('POST', '/auth/login-by-email', { email, password });
+    currentUser = await req('GET', '/auth/me');
+    closeAuth(); showDash();
+  } catch (err) {
+    msg.innerHTML = `<div class="ferr">${err.message || 'Credenciais inválidas.'}</div>`;
+  } finally { btn.disabled = false; btn.textContent = 'Entrar'; }
+}
+
+async function doRegister() {
+  const name = document.getElementById('rName').value.trim();
+  const email = document.getElementById('rEmail').value.trim();
+  const password = document.getElementById('rPassword').value;
+  const tenantName = document.getElementById('rTenant').value.trim();
+  const btn = document.getElementById('registerBtn');
+  const msg = document.getElementById('registerMsg');
+  if (!name || !email || !password || !tenantName) { msg.innerHTML = '<div class="ferr">Preencha todos os campos.</div>'; return; }
+  if (password.length < 8) { msg.innerHTML = '<div class="ferr">Senha deve ter pelo menos 8 caracteres.</div>'; return; }
+  btn.disabled = true; btn.textContent = 'Criando conta...'; msg.innerHTML = '';
+  try {
+    await req('POST', '/auth/register', { name, email, password, tenantName });
+    currentUser = await req('GET', '/auth/me');
+    msg.innerHTML = '<div class="fsuc">✓ Conta criada! Trial de 15 dias ativado.</div>';
+    setTimeout(() => { closeAuth(); showDash(); }, 1200);
+  } catch (err) {
+    msg.innerHTML = `<div class="ferr">${err.message || 'Erro ao criar conta.'}</div>`;
+  } finally { btn.disabled = false; btn.textContent = 'Criar conta — 15 dias grátis'; }
+}
+
+async function doLogout() {
+  try { await req('POST', '/auth/logout'); } catch {}
+  currentUser = null; showView('landing'); toast('Até logo!');
+}
+
+// ── DASHBOARD ──
+function showDash() {
+  showView('dashboard');
+  document.getElementById('topbarUser').textContent = currentUser?.name ?? '';
+  renderStatusPill();
+  navTo('overview', document.querySelector('.ni.active'));
+}
+
+async function renderStatusPill() {
+  try {
+    const s = await req('GET', '/billing/status');
+    const pill = document.getElementById('statusPill');
+    if (s.isLifetime) {
+      pill.innerHTML = `<div class="status-pill lifetime">
+        <div class="sp-label">✦ Acesso</div>
+        <div class="sp-value">Vitalício</div>
+        <div class="sp-sub">para sempre</div>
+        <button class="sp-btn" disabled>Ativo</button>
+      </div>`;
+    } else {
+      const color = s.daysLeft <= 3 ? 'var(--danger)' : 'var(--warn)';
+      pill.innerHTML = `<div class="status-pill trial">
+        <div class="sp-label">Trial</div>
+        <div class="sp-value" style="color:${color}">${s.daysLeft ?? '—'} dias</div>
+        <div class="sp-sub">restantes</div>
+        <button class="sp-btn" onclick="navTo('billing',null)">Ativar vitalício</button>
+      </div>`;
+    }
+  } catch {}
+}
+
+const dvTitles = { overview:'Visão geral', transactions:'Transações', accounts:'Contas', investments:'Investimentos', rules:'Regras', billing:'Plano' };
+
+function navTo(id, btn) {
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  else {
+    document.querySelectorAll('.ni').forEach(n => {
+      if (n.getAttribute('onclick')?.includes(`'${id}'`)) n.classList.add('active');
+    });
+  }
+  document.querySelectorAll('.dv').forEach(v => v.classList.remove('active'));
+  document.getElementById('dv-' + id).classList.add('active');
+  document.getElementById('dashTitle').textContent = dvTitles[id] ?? id;
+  const loaders = { overview: loadOverview, transactions: loadTransactions, accounts: loadAccounts, investments: loadInvestments, rules: loadRules, billing: loadBilling };
+  loaders[id]?.();
+}
+
+// ── OVERVIEW ──
+async function loadOverview() {
+  loadRecentTx(); loadAccountWidget(); loadSummary(); loadInvKpi();
+}
+async function loadSummary() {
+  try {
+    const s = await req('GET', '/transactions/summary');
+    document.getElementById('kpiIncome').textContent = brl(s.income);
+    document.getElementById('kpiExpense').textContent = brl(s.expense);
+  } catch {}
+}
+async function loadInvKpi() {
+  try { const s = await req('GET', '/investments/summary'); document.getElementById('kpiInv').textContent = brl(s.totalCurrent); }
+  catch { document.getElementById('kpiInv').textContent = 'R$ 0,00'; }
+}
+async function loadAccountWidget() {
+  const el = document.getElementById('accountWidget');
+  try {
+    const accounts = await req('GET', '/accounts');
+    if (!accounts.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">🏦</div><div>Nenhuma conta</div></div>'; return; }
+    let total = 0;
+    let html = '<div style="display:flex;flex-direction:column;gap:6px">';
+    accounts.forEach(a => {
+      total += a.balance ?? 0;
+      html += `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:var(--surface2);border-radius:8px">
+        <div style="font-size:13px">${a.icon ?? '🏦'} ${a.name}</div>
+        <div style="font-family:var(--mono);font-size:13px;color:${(a.balance??0)>=0?'var(--accent)':'var(--danger)'}">${brl(a.balance??0)}</div>
+      </div>`;
+    });
+    html += '</div>';
+    el.innerHTML = html;
+    document.getElementById('kpiSaldo').textContent = brl(total);
+  } catch { el.innerHTML = '<div class="empty"><div>Erro ao carregar</div></div>'; }
+}
+async function loadRecentTx() {
+  const el = document.getElementById('recentTx');
+  try {
+    const txs = await req('GET', '/transactions');
+    if (!txs.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">💸</div><div>Nenhuma transação</div></div>'; return; }
+    el.innerHTML = txs.slice(0,6).map(txRow).join('');
+  } catch { el.innerHTML = '<div class="empty"><div>Erro ao carregar</div></div>'; }
+}
+
+// ── TRANSACTIONS ──
+function setTxFilter(btn, type) {
+  txFilterType = type;
+  document.querySelectorAll('#dv-transactions .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadTransactions();
+}
+async function loadTransactions() {
+  const body = document.getElementById('txBody');
+  const search = document.getElementById('txSearch')?.value ?? '';
+  let url = '/transactions?';
+  if (txFilterType) url += `type=${txFilterType}&`;
+  if (search) url += `search=${encodeURIComponent(search)}&`;
+  body.innerHTML = '<tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr>';
+  try {
+    const txs = await req('GET', url);
+    if (!txs.length) { body.innerHTML = '<tr><td colspan="6"><div class="empty"><div>Nenhuma transação</div></div></td></tr>'; return; }
+    body.innerHTML = txs.map(tx => {
+      const isIn = tx.type==='INCOME'||tx.type==='PIX_IN';
+      const color = isIn?'var(--accent)':tx.type==='TRANSFER'?'var(--accent2)':'var(--danger)';
+      const sign = isIn?'+':'-';
+      return `<tr>
+        <td>${tx.description}</td>
+        <td style="color:var(--text3);font-size:12px">${tx.category?.name??'—'}</td>
+        <td style="font-family:var(--mono);font-size:12px;color:var(--text3)">${fmtDate(tx.date)}</td>
+        <td><span class="badge ${tx.type.toLowerCase()}">${tx.type}</span></td>
+        <td><span class="badge ${(tx.status??'').toLowerCase()}">${tx.status??'—'}</span></td>
+        <td style="text-align:right;font-family:var(--mono);font-weight:500;color:${color}">${sign}${brl(tx.amount??0)}</td>
+      </tr>`;
+    }).join('');
+  } catch { body.innerHTML = '<tr><td colspan="6"><div class="empty"><div>Erro ao carregar</div></div></td></tr>'; }
+}
+
+// ── ACCOUNTS ──
+async function loadAccounts() {
+  const grid = document.getElementById('accountsGrid');
+  grid.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const accounts = await req('GET', '/accounts');
+    if (!accounts.length) { grid.innerHTML = '<div class="empty"><div class="empty-icon">🏦</div><div>Nenhuma conta</div></div>'; return; }
+    grid.innerHTML = accounts.map(a => `
+      <div class="card">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div style="width:36px;height:36px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:18px">${a.icon??'🏦'}</div>
+          <div><div style="font-size:14px;font-weight:500">${a.name}</div><div style="font-size:11px;color:var(--text3)">${a.type}</div></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:24px;color:${(a.balance??0)>=0?'var(--accent)':'var(--danger)'}">${brl(a.balance??0)}</div>
+      </div>
+    `).join('');
+  } catch { grid.innerHTML = '<div class="empty"><div>Erro ao carregar</div></div>'; }
+}
+
+// ── INVESTMENTS ──
+async function loadInvestments() {
+  const list = document.getElementById('invList');
+  const kpis = document.getElementById('invKpis');
+  list.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const [portfolio, summary] = await Promise.all([req('GET','/investments'), req('GET','/investments/summary')]);
+    kpis.innerHTML = `
+      <div class="kpi blue"><div class="kpi-label">Investido</div><div class="kpi-value">${brl(summary.totalInvested)}</div></div>
+      <div class="kpi green"><div class="kpi-label">Valor atual</div><div class="kpi-value">${brl(summary.totalCurrent)}</div></div>
+      <div class="kpi ${summary.totalPnl>=0?'green':'red'}"><div class="kpi-label">P&L</div><div class="kpi-value" style="color:${summary.totalPnl>=0?'var(--accent)':'var(--danger)'}">${summary.totalPnl>=0?'+':''}${brl(summary.totalPnl)}</div></div>
+    `;
+    if (!portfolio.length) { list.innerHTML = '<div class="empty"><div class="empty-icon">📈</div><div>Nenhum investimento</div></div>'; return; }
+    list.innerHTML = portfolio.map(inv => {
+      const pc = inv.pnl>=0?'var(--accent)':'var(--danger)';
+      const ps = inv.pnl>=0?'+':'';
+      return `<div class="inv-row">
+        <div style="min-width:70px"><div style="font-family:var(--mono);font-size:13px;font-weight:500">${inv.symbol}</div><div style="font-size:10px;color:var(--text3)">${inv.type}</div></div>
+        <div style="flex:1;font-size:12px;color:var(--text3)">${inv.name}</div>
+        <div style="font-size:12px;color:var(--text3);min-width:60px;text-align:right">${inv.quantity} un</div>
+        <div style="font-family:var(--mono);font-size:13px;min-width:90px;text-align:right">${brl(inv.currentPrice)}</div>
+        <div style="font-family:var(--mono);font-size:12px;font-weight:500;min-width:70px;text-align:right;color:${pc}">${ps}${inv.pnlPct.toFixed(1)}%</div>
+        <div style="font-family:var(--mono);font-size:12px;min-width:100px;text-align:right;color:${pc}">${ps}${brl(Math.abs(inv.pnl))}</div>
+      </div>`;
+    }).join('');
+  } catch { list.innerHTML = '<div class="empty"><div>Erro ao carregar</div></div>'; }
+}
+
+// ── RULES ──
+async function loadRules() {
+  const el = document.getElementById('rulesList');
+  el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+  try {
+    const rules = await req('GET', '/automation/rules');
+    if (!rules.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">⚙️</div><div>Nenhuma regra criada</div></div>'; return; }
+    el.innerHTML = rules.map(r => `
+      <div class="card" style="margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <div style="width:8px;height:8px;border-radius:50%;background:${r.isActive?'var(--accent)':'var(--text3)'}"></div>
+          <div style="font-size:14px;font-weight:500;flex:1">${r.name}</div>
+          <div style="font-size:11px;color:var(--text3);font-family:var(--mono)">${r.triggerCount}x</div>
+        </div>
+        <div style="font-size:12px;color:var(--text3)">Dispara em: ${(r.triggerOn??[]).join(', ')}</div>
+      </div>
+    `).join('');
+  } catch { el.innerHTML = '<div class="empty"><div>Erro ao carregar</div></div>'; }
+}
+
+// ── BILLING ──
+async function loadBilling() {
+  const statusEl = document.getElementById('billingStatus');
+  const actionEl = document.getElementById('billingAction');
+  try {
+    const s = await req('GET', '/billing/status');
+    if (s.isLifetime) {
+      statusEl.innerHTML = `
+        <div style="text-align:center;padding:20px 0">
+          <div style="font-size:40px;margin-bottom:12px">✦</div>
+          <div style="font-family:var(--serif);font-size:28px;color:var(--accent);margin-bottom:6px">Acesso Vitalício</div>
+          <div style="font-size:14px;color:var(--text3)">Você tem acesso completo ao FinControl para sempre.</div>
+          <div style="margin-top:16px;font-size:13px;color:var(--text3)">Obrigado por apoiar o FinControl! 🙏</div>
+        </div>
+      `;
+      actionEl.innerHTML = '';
+    } else {
+      const color = s.daysLeft<=3?'var(--danger)':s.daysLeft<=7?'var(--warn)':'var(--text)';
+      statusEl.innerHTML = `
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:${s.expired?16:0}px">
+          <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Status</div>
+            <div style="font-family:var(--mono);font-size:16px;color:${s.expired?'var(--danger)':'var(--warn)'}">${s.expired?'EXPIRADO':'TRIAL'}</div></div>
+          <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Dias restantes</div>
+            <div style="font-family:var(--mono);font-size:16px;color:${color}">${s.daysLeft??0}</div></div>
+          <div><div style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Preço</div>
+            <div style="font-family:var(--mono);font-size:16px;color:var(--accent)">R$ 30,00</div></div>
+        </div>
+        ${s.expired?`<div style="background:#ff4d6a15;border:1px solid #ff4d6a30;color:var(--danger);padding:12px;border-radius:8px;font-size:13px">⚠️ Seu trial expirou. Ative o acesso vitalício abaixo.</div>`:''}
+      `;
+      actionEl.innerHTML = `
+        <div class="billing-box" style="text-align:center;max-width:420px;margin:0 auto">
+          <div style="font-family:var(--serif);font-size:52px;color:var(--text);letter-spacing:-.03em;margin-bottom:4px"><sup style="font-size:22px;font-family:var(--sans)">R$</sup>30</div>
+          <div style="font-size:13px;color:var(--text3);margin-bottom:24px">pagamento único — acesso vitalício completo</div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:24px;text-align:left">
+            ${['Contas e transações ilimitadas','Assistente IA local','OCR de recibos','Carteira de investimentos','Regras de automação','Todas as atualizações futuras'].map(f=>`<div style="font-size:13px;color:var(--text2);display:flex;gap:8px"><span style="color:var(--accent)">✓</span>${f}</div>`).join('')}
+          </div>
+          <button class="fb" onclick="generatePix()" style="padding:14px;font-size:15px">Pagar R$ 30,00 via Pix →</button>
+          <div style="font-size:12px;color:var(--text3);margin-top:10px">Pagamento via Pix — instantâneo e seguro</div>
+        </div>
+      `;
+    }
+  } catch { statusEl.innerHTML = '<div class="empty"><div>Erro ao carregar</div></div>'; }
+}
+
+async function generatePix() {
+  try {
+    const data = await req('POST', '/billing/pix');
+    billingEventId = data.billingEventId;
+    document.getElementById('pixCode').textContent = data.pixPayload;
+    document.getElementById('pixMsg').innerHTML = '';
+    document.getElementById('copyBtn').textContent = 'Copiar código Pix';
+    document.getElementById('copyBtn').classList.remove('copied');
+    document.getElementById('pixModal').style.display = 'flex';
+  } catch (err) { toast('Erro ao gerar Pix: ' + (err.message??'tente novamente'), true); }
+}
+
+function copyPix() {
+  navigator.clipboard.writeText(document.getElementById('pixCode').textContent).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ Copiado!'; btn.classList.add('copied');
+    toast('Código Pix copiado!');
+  });
+}
+
+async function confirmPayment() {
+  if (!billingEventId) return;
+  const msg = document.getElementById('pixMsg');
+  try {
+    const r = await req('POST', `/billing/confirm/${billingEventId}`);
+    msg.innerHTML = `<div class="fsuc">✓ ${r.message}</div>`;
+    toast('Acesso vitalício ativado! 🎉');
+    setTimeout(() => { closePixModal(); loadBilling(); renderStatusPill(); }, 2000);
+  } catch (err) { msg.innerHTML = `<div class="ferr">${err.message??'Erro ao confirmar.'}</div>`; }
+}
+
+function closePixModal() { document.getElementById('pixModal').style.display = 'none'; }
+function closePixOverlay(e) { if (e.target.id==='pixModal') closePixModal(); }
+
+// ── HELPERS ──
+function brl(v) { return 'R$ '+Number(v??0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtDate(d) { return d ? new Date(d).toLocaleDateString('pt-BR') : '—'; }
+function txRow(tx) {
+  const cls = tx.type==='INCOME'||tx.type==='PIX_IN'?'in':tx.type==='TRANSFER'?'trf':'out';
+  const icons = {INCOME:'💰',EXPENSE:'💸',TRANSFER:'↔️',PIX_IN:'📲',PIX_OUT:'📤'};
+  const color = cls==='in'?'var(--accent)':cls==='trf'?'var(--accent2)':'var(--danger)';
+  return `<div class="tx-row">
+    <div class="tx-icon ${cls}">${icons[tx.type]??'💳'}</div>
+    <div style="flex:1;min-width:0">
+      <div class="tx-desc">${tx.description}</div>
+      <div class="tx-cat">${tx.category?.name??'—'} · ${fmtDate(tx.date)}</div>
+    </div>
+    <div class="tx-amt ${cls}">${cls==='in'?'+':'-'}${brl(tx.amount??0)}</div>
+  </div>`;
+}
+let toastT;
+function toast(msg, err=false) {
+  const el = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  el.classList.toggle('error', err); el.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(()=>el.classList.remove('show'), 3000);
+}
+
+init();
+</script>
+</body>
+</html>

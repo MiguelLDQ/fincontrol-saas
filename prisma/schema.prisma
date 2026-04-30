@@ -1,0 +1,374 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector"), pgcrypto(map: "pgcrypto")]
+}
+
+enum Plan {
+  FREE
+  BASIC
+  PRO
+  ENTERPRISE
+}
+
+enum UserRole {
+  ADMIN
+  OWNER
+  MEMBER
+  READER
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  INVESTMENT
+  CRYPTO_WALLET
+  CREDIT_CARD
+  CASH
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+  TRANSFER
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  TRANSFER
+  PIX_IN
+  PIX_OUT
+  INVESTMENT_BUY
+  INVESTMENT_SELL
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  FAILED
+  SCHEDULED
+}
+
+enum InvestmentType {
+  STOCK
+  ETF
+  CRYPTO
+  FII
+  FIXED_INCOME
+  BOND
+  OTHER
+}
+
+enum DocumentStatus {
+  PENDING
+  PROCESSING
+  DONE
+  FAILED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum BillingType {
+  SUBSCRIPTION
+  UPGRADE
+  MANUAL_PIX
+  WEBHOOK_GATEWAY
+}
+
+enum BillingStatus {
+  PENDING
+  PAID
+  EXPIRED
+  FAILED
+  REFUNDED
+}
+
+model Tenant {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  plan          Plan      @default(FREE)
+  planExpiresAt DateTime?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  users           User[]
+  accounts        Account[]
+  categories      Category[]
+  transactions    Transaction[]
+  automationRules AutomationRule[]
+  investments     Investment[]
+  documents       Document[]
+  billingEvents   BillingEvent[]
+  chatSessions    ChatSession[]
+
+  @@map("tenants")
+}
+
+model User {
+  id               String    @id @default(cuid())
+  tenantId         String
+  email            String
+  passwordHash     String
+  name             String
+  role             UserRole  @default(MEMBER)
+  totpSecret       Bytes?
+  totpEnabled      Boolean   @default(false)
+  refreshTokenHash String?
+  failedLoginCount Int       @default(0)
+  lockedUntil      DateTime?
+  lastLoginAt      DateTime?
+  lastLoginIp      String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  tenant       Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  auditLogs    AuditLog[]
+  chatSessions ChatSession[]
+
+  @@unique([tenantId, email])
+  @@map("users")
+}
+
+model Account {
+  id               String      @id @default(cuid())
+  tenantId         String
+  name             String
+  type             AccountType
+  encryptedBalance Bytes
+  currency         String      @default("BRL")
+  pixKey           Bytes?
+  pixKeyType       String?
+  bankCode         String?
+  agency           String?
+  accountNumber    Bytes?
+  isActive         Boolean     @default(true)
+  color            String?
+  icon             String?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  tenant           Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  fromTransactions Transaction[] @relation("FromAccount")
+  toTransactions   Transaction[] @relation("ToAccount")
+
+  @@unique([tenantId, name])
+  @@map("accounts")
+}
+
+model Category {
+  id       String       @id @default(cuid())
+  tenantId String
+  name     String
+  type     CategoryType
+  color    String?
+  icon     String?
+  parentId String?
+
+  tenant          Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  parent          Category?        @relation("SubCategories", fields: [parentId], references: [id])
+  children        Category[]       @relation("SubCategories")
+  transactions    Transaction[]
+  automationRules AutomationRule[]
+
+  @@unique([tenantId, name])
+  @@map("categories")
+}
+
+model Transaction {
+  id              String            @id @default(cuid())
+  tenantId        String
+  accountId       String
+  toAccountId     String?
+  categoryId      String?
+  description     String
+  encryptedAmount Bytes
+  type            TransactionType
+  status          TransactionStatus @default(COMPLETED)
+  date            DateTime
+  dueDate         DateTime?
+  isRecurring     Boolean           @default(false)
+  recurrenceRule  String?
+  installments    Int?
+  installmentNum  Int?
+  parentId        String?
+  tags            String[]          @default([])
+  notes           String?
+  metadata        Json?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  tenant    Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  account   Account       @relation("FromAccount", fields: [accountId], references: [id])
+  toAccount Account?      @relation("ToAccount", fields: [toAccountId], references: [id])
+  category  Category?     @relation(fields: [categoryId], references: [id])
+  parent    Transaction?  @relation("Installments", fields: [parentId], references: [id])
+  children  Transaction[] @relation("Installments")
+  document  Document?
+
+  @@index([tenantId, date])
+  @@map("transactions")
+}
+
+model AutomationRule {
+  id          String   @id @default(cuid())
+  tenantId    String
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  priority    Int      @default(0)
+  conditions  Json
+  actions     Json
+  triggerOn   String[] @default(["TRANSACTION_CREATED"])
+  categoryId  String?
+
+  lastTriggeredAt DateTime?
+  triggerCount    Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id])
+
+  @@map("automation_rules")
+}
+
+model Investment {
+  id        String         @id @default(cuid())
+  tenantId  String
+  symbol    String
+  name      String
+  type      InvestmentType
+  quantity  Decimal        @db.Decimal(18, 8)
+  avgPrice  Decimal        @db.Decimal(18, 8)
+  currency  String         @default("BRL")
+  exchange  String?
+  notes     String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  tenant       Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  priceHistory InvestmentPrice[]
+
+  @@unique([tenantId, symbol])
+  @@map("investments")
+}
+
+model InvestmentPrice {
+  id           String   @id @default(cuid())
+  investmentId String
+  price        Decimal  @db.Decimal(18, 8)
+  change24h    Decimal? @db.Decimal(8, 4)
+  volume24h    Decimal? @db.Decimal(20, 2)
+  source       String
+  fetchedAt    DateTime @default(now())
+
+  investment Investment @relation(fields: [investmentId], references: [id], onDelete: Cascade)
+
+  @@map("investment_prices")
+}
+
+model Document {
+  id            String         @id @default(cuid())
+  tenantId      String
+  transactionId String?        @unique
+  filename      String
+  mimeType      String
+  storagePath   String
+  fileSizeBytes Int?
+  ocrText       String?
+  ocrData       Json?
+  status        DocumentStatus @default(PENDING)
+  errorMessage  String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  transaction Transaction? @relation(fields: [transactionId], references: [id])
+
+  @@map("documents")
+}
+
+model ChatSession {
+  
+  id        String   @id @default(cuid())
+  userId    String
+  tenantId  String
+  title     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant   Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@map("chat_sessions")
+}
+
+
+model ChatMessage {
+  id        String      @id @default(cuid())
+  sessionId String
+  role      MessageRole
+  content   String
+  metadata  Json?
+  createdAt DateTime    @default(now())
+
+  session ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  tenantId   String
+  userId     String?
+  action     String
+  entityType String?
+  entityId   String?
+  oldData    Json?
+  newData    Json?
+  ipAddress  String?
+  userAgent  String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model BillingEvent {
+  id          String        @id @default(cuid())
+  tenantId    String
+  type        BillingType
+  plan        Plan?
+  amount      Decimal?      @db.Decimal(10, 2)
+  currency    String        @default("BRL")
+  status      BillingStatus @default(PENDING)
+  pixQrCode   String?
+  pixPayload  String?
+  pixTxid     String?
+  gatewayRef  String?
+  webhookData Json?
+  expiresAt   DateTime?
+  paidAt      DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("billing_events")
+}
