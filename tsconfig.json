@@ -12,6 +12,7 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "skipLibCheck": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "noEmitOnError": false
   }
 }
